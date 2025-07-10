@@ -138,11 +138,7 @@ const updateData = (id: number) => {
                         class="save-button-img"
                     />
                 </span>
-                <span
-                    class="delete-button"
-                    @click="deleteExpense(expense)"
-                    v-if="editingExpenseId !== expense.id"
-                >
+                <span class="delete-button" @click="deleteExpense(expense)">
                     X
                 </span>
             </div>
@@ -197,6 +193,7 @@ const updateData = (id: number) => {
 }
 
 .expense-list-block {
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -209,6 +206,7 @@ const updateData = (id: number) => {
 .expense-item {
     display: flex;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .expense-item p {
@@ -231,6 +229,8 @@ const updateData = (id: number) => {
     font-size: 20px;
     outline: none;
     border: none;
+    width: 100%;
+    color: rgb(150, 61, 61);
 }
 
 .expense-item-actions {
@@ -268,15 +268,7 @@ const updateData = (id: number) => {
 }
 
 .expense-item-actions span:hover {
-    transform: scale(1.2);
-}
-
-.expense-item-actions span img {
-    transition: transform 0.3s ease;
-}
-
-.expense-item-actions span:hover img {
-    transform: scale(1.2);
+    transform: scale(1.4);
 }
 
 /* Убирает стрелки в Firefox */
