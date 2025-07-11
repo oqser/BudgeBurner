@@ -1,5 +1,5 @@
 import { createMemoryHistory, createRouter } from "vue-router";
-import Main from "../components/pages/main/Main.vue";
+import Main from "../views/Main.vue";
 
 const routes = [
     {
@@ -8,7 +8,7 @@ const routes = [
     },
     {
         path: "/settings",
-        component: () => import("../components/pages/settings/Settings.vue"),
+        component: () => import("../views/Settings.vue"),
     },
 ];
 
