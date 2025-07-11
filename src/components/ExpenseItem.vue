@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { useDeleteExpense, useUpdateExpense } from "../composables/useExpenses";
+import { toast } from "vue3-toastify";
+import editIcon from "/src/assets/edit-pencil-icon1.svg";
+import saveIcon from "/src/assets/save-icon1.svg";
+import deleteIcon from "/src/assets/delete-icon1.svg";
+import cancelIcon from "/src/assets/delete-icon.svg";
 
 const props = defineProps<{
     expense: {
@@ -9,68 +15,104 @@ const props = defineProps<{
     };
 }>();
 
-const emit = defineEmits(["delete-expense", "update-expense"]);
-
 const isEditing = ref(false);
 const editTitle = ref(props.expense.title);
 const editPrice = ref(props.expense.price);
 
+const { mutate: deleteExpense } = useDeleteExpense(props.expense);
+const { mutate: updateExpense, isPending } = useUpdateExpense();
+
+// update expense
 const updateData = () => {
-    emit("update-expense", {
+    updateExpense({
         id: props.expense.id,
         title: editTitle.value,
         price: editPrice.value,
     });
     isEditing.value = false;
 };
+
+// delete expense
+const handleDelete = () => deleteExpense();
+
+const vFocus = {
+    mounted: (el: any) => el.focus(),
+};
 </script>
 
 <template>
     <div class="expense-item">
-        <div class="expense-item-title">
-            <p v-if="!isEditing">{{ expense.title }}</p>
+        <form
+            v-if="isEditing"
+            @submit.prevent="updateData"
+            class="expense-edit-form"
+        >
             <input
                 class="expense-input-title"
-                v-else
                 type="text"
                 v-model="editTitle"
+                @keyup.esc="isEditing = false"
+                required
             />
-        </div>
-        <div class="expense-item-price">
-            <p v-if="!isEditing">{{ expense.price }}</p>
+
             <input
                 class="expense-input-price"
-                v-else
                 type="number"
-                v-model="editPrice"
+                v-model.number="editPrice"
+                @keyup.esc="isEditing = false"
+                required
+                min="0"
             />
-        </div>
-        <div class="expense-item-actions">
-            <span
-                @click="isEditing = true"
-                class="edit-button"
-                v-if="!isEditing"
-            >
-                <img
-                    src="/src/assets/edit-pencil.svg"
-                    class="edit-button-img"
-                />
-            </span>
-            <span @click="updateData" class="save-button" v-else>
-                <img src="/src/assets/save-icon.svg" class="save-button-img" />
-            </span>
-            <span
-                class="delete-button"
-                @click="$emit('delete-expense', expense)"
-            >
-                X
-            </span>
+
+            <div class="expense-item-actions">
+                <button type="submit" class="save-button" v-focus>
+                    <img :src="saveIcon" class="save-button-img" alt="Save" />
+                </button>
+                <button
+                    type="button"
+                    class="cancel-button"
+                    @click="isEditing = false"
+                >
+                    <img
+                        :src="cancelIcon"
+                        class="cancel-button-img"
+                        alt="Cancel"
+                    />
+                </button>
+            </div>
+        </form>
+
+        <div v-else class="expense-view">
+            <div class="expense-item-title">
+                <p>{{ expense.title }}</p>
+            </div>
+            <div class="expense-item-price">
+                <p>{{ expense.price }}</p>
+            </div>
+            <div class="expense-item-actions">
+                <button @click="isEditing = true" class="edit-button">
+                    <img :src="editIcon" class="edit-button-img" alt="Edit" />
+                </button>
+                <button class="delete-button" @click="handleDelete">
+                    <img
+                        :src="deleteIcon"
+                        class="delete-button-img"
+                        alt="Delete"
+                    />
+                </button>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped>
 .expense-item {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.expense-view {
     display: flex;
     width: 100%;
     box-sizing: border-box;
@@ -89,6 +131,14 @@ const updateData = () => {
     display: flex;
     justify-content: flex-end;
     flex: 2;
+}
+
+.expense-edit-form {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 0.5rem;
+    align-items: center;
 }
 
 .expense-item input {
@@ -122,19 +172,31 @@ const updateData = () => {
 .expense-item .edit-button-img {
     width: 15px;
     cursor: pointer;
+    transform: rotate(30deg);
 }
 .expense-item .save-button-img {
     width: 15px;
     cursor: pointer;
 }
-
-.expense-item-actions span {
-    display: inline-block;
-    transition: transform 0.3s ease;
+.expense-item .delete-button-img {
+    width: 15px;
+    cursor: pointer;
+}
+.expense-item .cancel-button-img {
+    width: 15px;
     cursor: pointer;
 }
 
-.expense-item-actions span:hover {
+.expense-item-actions button {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    outline: none;
+}
+
+.expense-item-actions button:hover {
     transform: scale(1.4);
 }
 </style>

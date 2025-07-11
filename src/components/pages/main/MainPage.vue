@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import ExpenseForm from "../../ExpenseForm.vue";
 import ExpenseItem from "../../ExpenseItem.vue";
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { useGetExpenses } from "../../../composables/useExpenses";
 
 type Expense = {
     id: number;
@@ -9,42 +10,26 @@ type Expense = {
     price: number;
 };
 
-
-
-const expenses = ref<Expense[]>([
-    { 
-        id: Date.now(), 
-        title: "Заправка", 
-        price: 2000 
+// get
+const { data: expensesData } = useGetExpenses();
+const expenses = ref<Expense[]>([]);
+watch(
+    expensesData,
+    (newData) => {
+        if (newData) {
+            expenses.value = newData;
+            console.log("Загружены траты:", newData);
+        }
     },
-    { 
-        id: Date.now() + 1, 
-        title: "Колодки", 
-        price: 4000 
-    },
-    { 
-        id: Date.now() + 2, 
-        title: "Фары", 
-        price: 40000 
-    },
-]);
+    { immediate: true }
+);
 
-const addExpense = (newExpense: Omit<Expense, 'id'>) => {
-  expenses.value.push({
-    id: Date.now(),
-    ...newExpense
-  })
-}
-
-const deleteExpense = (expense: Expense) => {
-    expenses.value = expenses.value.filter((t) => t !== expense);
-};
-
-const updateExpense = (updatedExpense: Expense) => {
-    const index = expenses.value.findIndex((e) => e.id === updatedExpense.id);
-    if (index !== -1) {
-        expenses.value[index] = updatedExpense;
-    }
+// add
+const addExpense = (newExpense: Omit<Expense, "id">) => {
+    expenses.value.push({
+        id: Date.now(),
+        ...newExpense,
+    });
 };
 </script>
 
@@ -58,8 +43,6 @@ const updateExpense = (updatedExpense: Expense) => {
             v-for="expense in expenses"
             :key="expense.id"
             :expense="expense"
-            @delete-expense="deleteExpense"
-            @update-expense="updateExpense"
         />
     </div>
 </template>
