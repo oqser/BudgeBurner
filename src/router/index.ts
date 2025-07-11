@@ -1,10 +1,15 @@
 import { createMemoryHistory, createRouter } from "vue-router";
-import Main from "../pages/Main.vue";
-import Settings from "../pages/Settings.vue";
+import Main from "../components/pages/main/Main.vue";
 
 const routes = [
-    { path: "/", component: Main },
-    { path: "/settings", component: Settings },
+    {
+        path: "/",
+        component: Main,
+    },
+    {
+        path: "/settings",
+        component: () => import("../components/pages/settings/Settings.vue"),
+    },
 ];
 
 const router = createRouter({
