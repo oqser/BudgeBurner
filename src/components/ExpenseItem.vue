@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watchEffect } from "vue";
 import { useDeleteExpense, useUpdateExpense } from "../composables/useExpenses";
-import { toast } from "vue3-toastify";
 import editIcon from "/src/assets/edit-pencil-icon1.svg";
 import saveIcon from "/src/assets/save-icon1.svg";
 import deleteIcon from "/src/assets/delete-icon1.svg";
@@ -19,21 +18,29 @@ const isEditing = ref(false);
 const editTitle = ref(props.expense.title);
 const editPrice = ref(props.expense.price);
 
-const { mutate: deleteExpense } = useDeleteExpense(props.expense);
-const { mutate: updateExpense, isPending } = useUpdateExpense();
+const update = useUpdateExpense();
+const remove = useDeleteExpense();
 
-// update expense
-const updateData = () => {
-    updateExpense({
+watchEffect(() => {
+    editTitle.value = props.expense.title;
+    editPrice.value = props.expense.price;
+});
+const handleUpdate = () => {
+    if (
+        editTitle.value === props.expense.title &&
+        editPrice.value === props.expense.price
+    ) {
+        isEditing.value = false;
+        return;
+    }
+
+    update.mutate({
         id: props.expense.id,
         title: editTitle.value,
         price: editPrice.value,
     });
     isEditing.value = false;
 };
-
-// delete expense
-const handleDelete = () => deleteExpense();
 
 const vFocus = {
     mounted: (el: any) => el.focus(),
@@ -44,8 +51,8 @@ const vFocus = {
     <div class="expense-item">
         <form
             v-if="isEditing"
-            @submit.prevent="updateData"
             class="expense-edit-form"
+            @submit.prevent="handleUpdate"
         >
             <input
                 class="expense-input-title"
@@ -53,6 +60,7 @@ const vFocus = {
                 v-model="editTitle"
                 @keyup.esc="isEditing = false"
                 required
+                v-focus
             />
 
             <input
@@ -65,7 +73,7 @@ const vFocus = {
             />
 
             <div class="expense-item-actions">
-                <button type="submit" class="save-button" v-focus>
+                <button type="submit" class="save-button">
                     <img :src="saveIcon" class="save-button-img" alt="Save" />
                 </button>
                 <button
@@ -93,7 +101,16 @@ const vFocus = {
                 <button @click="isEditing = true" class="edit-button">
                     <img :src="editIcon" class="edit-button-img" alt="Edit" />
                 </button>
-                <button class="delete-button" @click="handleDelete">
+                <button
+                    class="delete-button"
+                    @click="
+                        () =>
+                            remove.mutate({
+                                id: expense.id,
+                                title: expense.title,
+                            })
+                    "
+                >
                     <img
                         :src="deleteIcon"
                         class="delete-button-img"

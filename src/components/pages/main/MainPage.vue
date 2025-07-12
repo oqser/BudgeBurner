@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import ExpenseForm from "../../ExpenseForm.vue";
 import ExpenseItem from "../../ExpenseItem.vue";
-import { ref, watch } from "vue";
-import { useGetExpenses } from "../../../composables/useExpenses";
+import { computed, ref, watch } from "vue";
+import { useExpenses } from "../../../composables/useExpenses";
 
 type Expense = {
     id: number;
@@ -11,32 +11,17 @@ type Expense = {
 };
 
 // get
-const { data: expensesData } = useGetExpenses();
-const expenses = ref<Expense[]>([]);
-watch(
-    expensesData,
-    (newData) => {
-        if (newData) {
-            expenses.value = newData;
-            console.log("Загружены траты:", newData);
-        }
-    },
-    { immediate: true }
-);
-
-// add
-const addExpense = (newExpense: Omit<Expense, "id">) => {
-    expenses.value.push({
-        id: Date.now(),
-        ...newExpense,
-    });
-};
+const { data: expensesData } = useExpenses();
+const expenses = computed(() => {
+    if (!expensesData.value) return [];
+    return [...expensesData.value].sort((a, b) => b.id - a.id);
+});
 </script>
 
 <template>
     <h2>Лист затрат</h2>
 
-    <ExpenseForm @add-expense="addExpense" />
+    <ExpenseForm />
 
     <div class="expense-list-block">
         <ExpenseItem

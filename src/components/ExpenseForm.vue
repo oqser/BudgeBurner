@@ -1,22 +1,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
-
-const emit = defineEmits(["add-expense"]);
+import { useCreateExpense } from "../composables/useExpenses";
 
 const expenseTitle = ref("");
 const expensePrice = ref<number | null>(null);
 
-const addExpense = () => {
-    if (!expenseTitle.value.trim()) return;
-
-    emit("add-expense", {
-        title: expenseTitle.value,
-        price: expensePrice.value || 0,
-    });
-
-    expenseTitle.value = "";
-    expensePrice.value = null;
-};
+// add
+const create = useCreateExpense();
 </script>
 
 <template>
@@ -35,7 +25,16 @@ const addExpense = () => {
         />
         <div class="expense-list-form-action-buttons">
             <button
-                @click="addExpense()"
+                @click="
+                    () => {
+                        create.mutate({
+                            title: expenseTitle,
+                            price: expensePrice || 0,
+                        });
+                        expenseTitle = '';
+                        expensePrice = null;
+                    }
+                "
                 class="add-expense-button"
                 :disabled="!expenseTitle.trim()"
             >
