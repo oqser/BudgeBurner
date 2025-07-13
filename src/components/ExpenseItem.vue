@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, computed } from "vue";
 import { useDeleteExpense, useUpdateExpense } from "../composables/useExpenses";
 import editIcon from "/src/assets/edit-pencil-icon1.svg";
 import saveIcon from "/src/assets/save-icon1.svg";
 import deleteIcon from "/src/assets/delete-icon1.svg";
 import cancelIcon from "/src/assets/delete-icon.svg";
+import { useCloseActions } from "../utils/useCloseActions";
 
 const props = defineProps<{
     expense: {
@@ -15,35 +16,36 @@ const props = defineProps<{
 }>();
 
 const isEditing = ref(false);
-const editTitle = ref(props.expense.title);
-const editPrice = ref(props.expense.price);
+const editFormRef = ref<HTMLFormElement | null>(null);
+const formState = ref({
+    title: props.expense.title,
+    price: props.expense.price,
+});
 
 const update = useUpdateExpense();
 const remove = useDeleteExpense();
 
-watch(
-    () => props.expense,
-    (newVal) => {
-        editTitle.value = newVal.title;
-        editPrice.value = newVal.price;
-    },
-    { immediate: true, deep: true }
-);
+const resetForm = () => {
+    formState.value = { ...props.expense };
+};
+const cancelEditing = () => {
+    if (!isEditing.value) return;
+
+    resetForm();
+    isEditing.value = false;
+};
+useCloseActions(isEditing, cancelEditing, editFormRef);
 
 const handleUpdate = () => {
     if (
-        editTitle.value === props.expense.title &&
-        editPrice.value === props.expense.price
+        formState.value.title !== props.expense.title ||
+        formState.value.price !== props.expense.price
     ) {
-        isEditing.value = false;
-        return;
+        update.mutate({
+            id: props.expense.id,
+            ...formState.value,
+        });
     }
-
-    update.mutate({
-        id: props.expense.id,
-        title: editTitle.value,
-        price: editPrice.value || 0,
-    });
     isEditing.value = false;
 };
 
@@ -53,51 +55,80 @@ const handleRemove = () => {
         title: props.expense.title,
     });
 };
-const vFocus = {
-    mounted: (el: any) => el.focus(),
-};
+
+const actionButtons = computed(() => [
+    ...(isEditing.value
+        ? [
+              {
+                  type: "submit" as const,
+                  class: "save-button",
+                  icon: saveIcon,
+                  handler: handleUpdate,
+                  alt: "Save",
+              },
+              {
+                  type: "button" as const,
+                  class: "cancel-button",
+                  icon: cancelIcon,
+                  handler: cancelEditing,
+                  alt: "Cancel",
+              },
+          ]
+        : [
+              {
+                  type: "button" as const,
+                  class: "edit-button",
+                  icon: editIcon,
+                  handler: () => (isEditing.value = true),
+                  alt: "Edit",
+              },
+              {
+                  type: "button" as const,
+                  class: "delete-button",
+                  icon: deleteIcon,
+                  handler: handleRemove,
+                  alt: "Delete",
+              },
+          ]),
+]);
 </script>
 
 <template>
     <div class="expense-item">
         <form
             v-if="isEditing"
+            ref="editFormRef"
             class="expense-edit-form"
             @submit.prevent="handleUpdate"
-            
         >
             <input
                 class="expense-input-title"
                 type="text"
-                v-model="editTitle"
-                @keyup.esc="isEditing = false"
+                v-model="formState.title"
                 required
-                v-focus
-                
             />
 
             <input
                 class="expense-input-price"
                 type="number"
-                v-model.number="editPrice"
-                @keyup.esc="isEditing = false"
+                v-model.number="formState.price"
             />
 
             <div class="expense-item-actions">
-                <button type="submit" class="save-button">
-                    <img :src="saveIcon" class="save-button-img" alt="Save" />
-                </button>
-                <button
-                    type="button"
-                    class="cancel-button"
-                    @click="isEditing = false"
-                >
-                    <img
-                        :src="cancelIcon"
-                        class="cancel-button-img"
-                        alt="Cancel"
-                    />
-                </button>
+                <template v-for="action in actionButtons" :key="action">
+                    <button
+                        :type="action.type"
+                        :class="action.class"
+                        @click="action.handler"
+                        alt="action.alt"
+                    >
+                        <img
+                            :src="action.icon"
+                            :class="`${action.class}-img`"
+                            :alt="action.alt"
+                        />
+                    </button>
+                </template>
             </div>
         </form>
 
@@ -106,9 +137,7 @@ const vFocus = {
                 <p>{{ expense.title }}</p>
             </div>
             <div class="expense-item-price">
-                <p>
-                    {{ expense.price === 0 ? "" : `${expense.price}` }}
-                </p>
+                <p>{{ expense.price === 0 ? "" : expense.price }}</p>
             </div>
             <div class="expense-item-actions">
                 <button @click="isEditing = true" class="edit-button">
@@ -125,7 +154,6 @@ const vFocus = {
         </div>
     </div>
 </template>
-
 <style scoped>
 .expense-item {
     display: flex;
