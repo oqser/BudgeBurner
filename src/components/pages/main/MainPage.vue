@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import ExpenseForm from "../../ExpenseForm.vue";
 import ExpenseItem from "../../ExpenseItem.vue";
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useExpenses } from "../../../composables/useExpenses";
+import Pagination from "../../Pagination.vue";
 
 type Expense = {
     id: number;
@@ -10,12 +11,27 @@ type Expense = {
     price: number | null;
 };
 
-// get
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
 const { data: expensesData } = useExpenses();
-const expenses = computed(() => {
+
+const paginatedExpenses = computed(() => {
     if (!expensesData.value) return [];
-    return [...expensesData.value].sort((a, b) => b.id - a.id);
+
+    const sorted = [...expensesData.value].sort((a, b) => b.id - a.id);
+    const startIndex = (currentPage.value - 1) * itemsPerPage;
+    return sorted.slice(startIndex, startIndex + itemsPerPage);
 });
+
+const totalPages = computed(() => {
+    if (!expensesData.value) return 0;
+    return Math.ceil(expensesData.value.length / itemsPerPage);
+});
+
+const handlePageChange = (page: number) => {
+    currentPage.value = page;
+};
 </script>
 
 <template>
@@ -25,11 +41,17 @@ const expenses = computed(() => {
 
     <div class="expense-list-block">
         <ExpenseItem
-            v-for="expense in expenses"
+            v-for="expense in paginatedExpenses"
             :key="expense.id"
             :expense="expense"
         />
     </div>
+
+    <Pagination
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+    />
 </template>
 
 <style scoped>
@@ -43,6 +65,7 @@ const expenses = computed(() => {
     max-width: 50vh;
     width: 100%;
 }
+
 h2 {
     margin: 0;
 }
