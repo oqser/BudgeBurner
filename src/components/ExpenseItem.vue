@@ -75,6 +75,13 @@ const handleRemove = () => {
                 type="number"
                 v-model.number="formState.price"
             />
+
+            <ActionButtons
+                :isEditing="isEditing"
+                @edit="isEditing = true"
+                @cancel="cancelEditing"
+                @delete="handleRemove"
+            />
         </form>
 
         <div v-else class="expense-view">
@@ -84,18 +91,16 @@ const handleRemove = () => {
             <div class="expense-item-price">
                 <p>{{ expense.price === 0 ? "" : expense.price }}</p>
             </div>
-        </div>
 
-        <ActionButtons
-            :isEditing="isEditing"
-            @edit="isEditing = true"
-            @save="handleUpdate"
-            @cancel="cancelEditing"
-            @delete="handleRemove"
-        />
+            <ActionButtons
+                :isEditing="isEditing"
+                @edit="isEditing = true"
+                @cancel="cancelEditing"
+                @delete="handleRemove"
+            />
+        </div>
     </div>
 </template>
-
 <style scoped>
 .expense-item {
     display: flex;

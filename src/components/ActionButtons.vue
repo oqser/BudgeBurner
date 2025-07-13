@@ -9,16 +9,12 @@ type ActionButton = {
     type: "button" | "submit";
     class: string;
     icon: string;
-    handler: () => void;
+    handler?: () => void;
     alt: string;
 };
 
 const props = defineProps<{
     isEditing: boolean;
-    onEdit: () => void;
-    onSave: () => void;
-    onCancel: () => void;
-    onDelete: () => void;
 }>();
 
 const emit = defineEmits<{
@@ -35,7 +31,6 @@ const actionButtons = computed<ActionButton[]>(() =>
                   type: "submit",
                   class: "save-button",
                   icon: saveIcon,
-                  handler: () => emit("save"),
                   alt: "Save",
               },
               {
