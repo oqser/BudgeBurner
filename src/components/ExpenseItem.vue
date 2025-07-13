@@ -113,23 +113,6 @@ const actionButtons = computed(() => [
                 type="number"
                 v-model.number="formState.price"
             />
-
-            <div class="expense-item-actions">
-                <template v-for="action in actionButtons" :key="action">
-                    <button
-                        :type="action.type"
-                        :class="action.class"
-                        @click="action.handler"
-                        alt="action.alt"
-                    >
-                        <img
-                            :src="action.icon"
-                            :class="`${action.class}-img`"
-                            :alt="action.alt"
-                        />
-                    </button>
-                </template>
-            </div>
         </form>
 
         <div v-else class="expense-view">
@@ -139,18 +122,23 @@ const actionButtons = computed(() => [
             <div class="expense-item-price">
                 <p>{{ expense.price === 0 ? "" : expense.price }}</p>
             </div>
-            <div class="expense-item-actions">
-                <button @click="isEditing = true" class="edit-button">
-                    <img :src="editIcon" class="edit-button-img" alt="Edit" />
-                </button>
-                <button class="delete-button" @click="handleRemove">
+        </div>
+
+        <div class="expense-item-actions">
+            <template v-for="action in actionButtons" :key="action">
+                <button
+                    :type="action.type"
+                    :class="action.class"
+                    @click="action.handler"
+                    alt="action.alt"
+                >
                     <img
-                        :src="deleteIcon"
-                        class="delete-button-img"
-                        alt="Delete"
+                        :src="action.icon"
+                        :class="`${action.class}-img`"
+                        :alt="action.alt"
                     />
                 </button>
-            </div>
+            </template>
         </div>
     </div>
 </template>
@@ -159,6 +147,7 @@ const actionButtons = computed(() => [
     display: flex;
     width: 100%;
     box-sizing: border-box;
+    gap: 1rem;
 }
 
 .expense-view {
@@ -176,12 +165,12 @@ const actionButtons = computed(() => [
 
 .expense-item-title {
     display: flex;
-    flex: 3;
+    flex: 2;
 }
 .expense-item-price {
     display: flex;
     justify-content: flex-end;
-    flex: 2;
+    flex: 1;
 }
 
 .expense-edit-form {
@@ -212,7 +201,7 @@ const actionButtons = computed(() => [
 .expense-item-actions {
     display: flex;
     align-items: flex-end;
-    gap: 0.5rem;
+    gap: 0.3rem;
     flex: 1;
     justify-content: flex-end;
 }
@@ -221,7 +210,7 @@ const actionButtons = computed(() => [
     transform: rotate(45deg);
 }
 .expense-item img {
-    width: 18px;
+    width: 20px;
 }
 
 .expense-item-actions button {
