@@ -5,85 +5,112 @@ import saveIcon from "/src/assets/save-icon1.svg";
 import deleteIcon from "/src/assets/delete-icon1.svg";
 import cancelIcon from "/src/assets/delete-icon.svg";
 
+type ActionButton = {
+    type: "button" | "submit";
+    class: string;
+    icon: string;
+    handler: () => void;
+    alt: string;
+};
+
 const props = defineProps<{
     isEditing: boolean;
+    onEdit: () => void;
+    onSave: () => void;
+    onCancel: () => void;
+    onDelete: () => void;
 }>();
 
-const emit = defineEmits(["edit", "save", "cancel", "delete"]);
+const emit = defineEmits<{
+    (e: "edit"): void;
+    (e: "save"): void;
+    (e: "cancel"): void;
+    (e: "delete"): void;
+}>();
 
-const buttons = computed(() => {
-    return props.isEditing
+const actionButtons = computed<ActionButton[]>(() =>
+    props.isEditing
         ? [
               {
-                  type: "submit" as const,
+                  type: "submit",
                   class: "save-button",
                   icon: saveIcon,
-                  alt: "Save",
                   handler: () => emit("save"),
+                  alt: "Save",
               },
               {
-                  type: "button" as const,
+                  type: "button",
                   class: "cancel-button",
                   icon: cancelIcon,
-                  alt: "Cancel",
                   handler: () => emit("cancel"),
+                  alt: "Cancel",
               },
           ]
         : [
               {
-                  type: "button" as const,
+                  type: "button",
                   class: "edit-button",
                   icon: editIcon,
-                  alt: "Edit",
                   handler: () => emit("edit"),
+                  alt: "Edit",
               },
               {
-                  type: "button" as const,
+                  type: "button",
                   class: "delete-button",
                   icon: deleteIcon,
-                  alt: "Delete",
                   handler: () => emit("delete"),
+                  alt: "Delete",
               },
-          ];
-});
+          ]
+);
 </script>
 
 <template>
-    <div class="action-buttons">
-        <button
-            v-for="(action, index) in buttons"
-            :key="index"
-            :type="action.type"
-            :class="action.class"
-            @click="action.handler"
-            v-on="action.type === 'submit' ? {} : { click: action.handler }"
-        >
-            <img
-                :src="action.icon"
-                :class="`${action.class}-img`"
+    <div class="expense-item-actions">
+        <template v-for="action in actionButtons" :key="action.class">
+            <button
+                :type="action.type"
+                :class="action.class"
+                @click="action.handler"
                 :alt="action.alt"
-            />
-        </button>
+            >
+                <img
+                    :src="action.icon"
+                    :class="`${action.class}-img`"
+                    :alt="action.alt"
+                />
+            </button>
+        </template>
     </div>
 </template>
 
 <style scoped>
-button {
-    width: 18px;
-}
-img {
-    width: 18px;
+.expense-item-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.3rem;
+    flex: 1;
+    justify-content: flex-end;
 }
 
-button {
+.expense-item-actions img {
+    width: 20px;
+}
+
+.expense-item-actions button {
     transition: transform 0.3s ease;
     cursor: pointer;
     border: none;
     padding: 0;
     outline: none;
+    background: none;
 }
 
-button:hover {
+.expense-item-actions button:hover {
     transform: scale(1.4);
+}
+
+.edit-button-img {
+    transform: rotate(45deg);
 }
 </style>

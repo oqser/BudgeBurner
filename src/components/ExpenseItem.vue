@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { useDeleteExpense, useUpdateExpense } from "../composables/useExpenses";
-import editIcon from "/src/assets/edit-pencil-icon1.svg";
-import saveIcon from "/src/assets/save-icon1.svg";
-import deleteIcon from "/src/assets/delete-icon1.svg";
-import cancelIcon from "/src/assets/delete-icon.svg";
 import { useCloseActions } from "../utils/useCloseActions";
+import ActionButtons from "./ActionButtons.vue";
 
 const props = defineProps<{
     expense: {
@@ -28,12 +25,13 @@ const remove = useDeleteExpense();
 const resetForm = () => {
     formState.value = { ...props.expense };
 };
+
 const cancelEditing = () => {
     if (!isEditing.value) return;
-
     resetForm();
     isEditing.value = false;
 };
+
 useCloseActions(isEditing, cancelEditing, editFormRef);
 
 const handleUpdate = () => {
@@ -55,42 +53,6 @@ const handleRemove = () => {
         title: props.expense.title,
     });
 };
-
-const actionButtons = computed(() => [
-    ...(isEditing.value
-        ? [
-              {
-                  type: "submit" as const,
-                  class: "save-button",
-                  icon: saveIcon,
-                  handler: handleUpdate,
-                  alt: "Save",
-              },
-              {
-                  type: "button" as const,
-                  class: "cancel-button",
-                  icon: cancelIcon,
-                  handler: cancelEditing,
-                  alt: "Cancel",
-              },
-          ]
-        : [
-              {
-                  type: "button" as const,
-                  class: "edit-button",
-                  icon: editIcon,
-                  handler: () => (isEditing.value = true),
-                  alt: "Edit",
-              },
-              {
-                  type: "button" as const,
-                  class: "delete-button",
-                  icon: deleteIcon,
-                  handler: handleRemove,
-                  alt: "Delete",
-              },
-          ]),
-]);
 </script>
 
 <template>
@@ -124,24 +86,16 @@ const actionButtons = computed(() => [
             </div>
         </div>
 
-        <div class="expense-item-actions">
-            <template v-for="action in actionButtons" :key="action">
-                <button
-                    :type="action.type"
-                    :class="action.class"
-                    @click="action.handler"
-                    alt="action.alt"
-                >
-                    <img
-                        :src="action.icon"
-                        :class="`${action.class}-img`"
-                        :alt="action.alt"
-                    />
-                </button>
-            </template>
-        </div>
+        <ActionButtons
+            :isEditing="isEditing"
+            @edit="isEditing = true"
+            @save="handleUpdate"
+            @cancel="cancelEditing"
+            @delete="handleRemove"
+        />
     </div>
 </template>
+
 <style scoped>
 .expense-item {
     display: flex;
@@ -196,33 +150,6 @@ const actionButtons = computed(() => [
 .expense-item input.expense-input-price {
     text-align: center;
     flex: 1;
-}
-
-.expense-item-actions {
-    display: flex;
-    align-items: flex-end;
-    gap: 0.3rem;
-    flex: 1;
-    justify-content: flex-end;
-}
-
-.expense-item .edit-button-img {
-    transform: rotate(45deg);
-}
-.expense-item img {
-    width: 20px;
-}
-
-.expense-item-actions button {
-    transition: transform 0.3s ease;
-    cursor: pointer;
-    border: none;
-    padding: 0;
-    outline: none;
-}
-
-.expense-item-actions button:hover {
-    transform: scale(1.4);
 }
 
 input::-webkit-outer-spin-button,
