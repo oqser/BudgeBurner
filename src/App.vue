@@ -16,7 +16,6 @@ import Header from "./components/common/Header.vue";
     height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
 }
 .content {
     height: inherit;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { ref, watch } from "vue";
 import { useDeleteExpense, useUpdateExpense } from "../composables/useExpenses";
 import editIcon from "/src/assets/edit-pencil-icon1.svg";
 import saveIcon from "/src/assets/save-icon1.svg";
@@ -21,10 +21,15 @@ const editPrice = ref(props.expense.price);
 const update = useUpdateExpense();
 const remove = useDeleteExpense();
 
-watchEffect(() => {
-    editTitle.value = props.expense.title;
-    editPrice.value = props.expense.price;
-});
+watch(
+    () => props.expense,
+    (newVal) => {
+        editTitle.value = newVal.title;
+        editPrice.value = newVal.price;
+    },
+    { immediate: true, deep: true }
+);
+
 const handleUpdate = () => {
     if (
         editTitle.value === props.expense.title &&
@@ -37,11 +42,17 @@ const handleUpdate = () => {
     update.mutate({
         id: props.expense.id,
         title: editTitle.value,
-        price: editPrice.value,
+        price: editPrice.value || 0,
     });
     isEditing.value = false;
 };
 
+const handleRemove = () => {
+    remove.mutate({
+        id: props.expense.id,
+        title: props.expense.title,
+    });
+};
 const vFocus = {
     mounted: (el: any) => el.focus(),
 };
@@ -53,6 +64,7 @@ const vFocus = {
             v-if="isEditing"
             class="expense-edit-form"
             @submit.prevent="handleUpdate"
+            
         >
             <input
                 class="expense-input-title"
@@ -61,6 +73,7 @@ const vFocus = {
                 @keyup.esc="isEditing = false"
                 required
                 v-focus
+                
             />
 
             <input
@@ -68,8 +81,6 @@ const vFocus = {
                 type="number"
                 v-model.number="editPrice"
                 @keyup.esc="isEditing = false"
-                required
-                min="0"
             />
 
             <div class="expense-item-actions">
@@ -95,22 +106,15 @@ const vFocus = {
                 <p>{{ expense.title }}</p>
             </div>
             <div class="expense-item-price">
-                <p>{{ expense.price }}</p>
+                <p>
+                    {{ expense.price === 0 ? "" : `${expense.price}` }}
+                </p>
             </div>
             <div class="expense-item-actions">
                 <button @click="isEditing = true" class="edit-button">
                     <img :src="editIcon" class="edit-button-img" alt="Edit" />
                 </button>
-                <button
-                    class="delete-button"
-                    @click="
-                        () =>
-                            remove.mutate({
-                                id: expense.id,
-                                title: expense.title,
-                            })
-                    "
-                >
+                <button class="delete-button" @click="handleRemove">
                     <img
                         :src="deleteIcon"
                         class="delete-button-img"
@@ -138,6 +142,8 @@ const vFocus = {
 .expense-item p {
     font-size: 18px;
     margin: 0;
+    padding: 0;
+    border: 2px solid transparent;
 }
 
 .expense-item-title {
@@ -159,12 +165,20 @@ const vFocus = {
 }
 
 .expense-item input {
-    border-radius: 8px;
+    padding: 2px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
     font-size: 20px;
     outline: none;
-    border: none;
+    border-radius: 0.3rem;
     width: 100%;
-    color: green;
+}
+.expense-item input.expense-input-title {
+    padding-left: 0.3rem;
+    flex: 5;
+}
+.expense-item input.expense-input-price {
+    text-align: center;
+    flex: 1;
 }
 
 .expense-item-actions {
@@ -175,37 +189,14 @@ const vFocus = {
     justify-content: flex-end;
 }
 
-.expense-item-actions .edit-button {
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.expense-item-actions .delete-button {
-    cursor: pointer;
-    color: red;
-    font-weight: bold;
-}
-
 .expense-item .edit-button-img {
-    width: 15px;
-    cursor: pointer;
-    transform: rotate(30deg);
+    transform: rotate(45deg);
 }
-.expense-item .save-button-img {
-    width: 15px;
-    cursor: pointer;
-}
-.expense-item .delete-button-img {
-    width: 15px;
-    cursor: pointer;
-}
-.expense-item .cancel-button-img {
-    width: 15px;
-    cursor: pointer;
+.expense-item img {
+    width: 18px;
 }
 
 .expense-item-actions button {
-    display: inline-block;
     transition: transform 0.3s ease;
     cursor: pointer;
     border: none;
@@ -215,5 +206,15 @@ const vFocus = {
 
 .expense-item-actions button:hover {
     transform: scale(1.4);
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
 }
 </style>

@@ -10,7 +10,7 @@ createApp(App)
     .use(router)
     .use(VueQueryPlugin)
     .use(Vue3Toastify, {
-        autoClose: 3000,
+        autoClose: 4000,
         theme: "colored",
     })
     .mount("#app");

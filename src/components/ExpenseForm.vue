@@ -7,6 +7,15 @@ const expensePrice = ref<number | null>(null);
 
 // add
 const create = useCreateExpense();
+
+const handleCreate = () => {
+    create.mutate({
+        title: expenseTitle.value,
+        price: expensePrice.value || 0,
+    }),
+        (expenseTitle.value = ""),
+        (expensePrice.value = null);
+};
 </script>
 
 <template>
@@ -25,16 +34,7 @@ const create = useCreateExpense();
         />
         <div class="expense-list-form-action-buttons">
             <button
-                @click="
-                    () => {
-                        create.mutate({
-                            title: expenseTitle,
-                            price: expensePrice || 0,
-                        });
-                        expenseTitle = '';
-                        expensePrice = null;
-                    }
-                "
+                @click="handleCreate"
                 class="add-expense-button"
                 :disabled="!expenseTitle.trim()"
             >

@@ -7,7 +7,7 @@ import { useExpenses } from "../../../composables/useExpenses";
 type Expense = {
     id: number;
     title: string;
-    price: number;
+    price: number | null;
 };
 
 // get
@@ -38,19 +38,12 @@ const expenses = computed(() => {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 0.4rem;
     justify-content: space-between;
     max-width: 50vh;
     width: 100%;
 }
-
-input[type="number"] {
-    -moz-appearance: textfield;
-}
-
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
+h2 {
     margin: 0;
 }
 </style>
