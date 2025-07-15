@@ -7,8 +7,9 @@ import Pagination from "../../Pagination.vue";
 
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
+const sortPage = ref("-id");
 
-const { data: expensesData } = useExpenses(currentPage, itemsPerPage);
+const { data: expensesData } = useExpenses(currentPage, itemsPerPage, sortPage);
 
 const expenses = computed(() => {
     if (!expensesData.value) return [];

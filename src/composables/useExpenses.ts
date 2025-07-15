@@ -11,19 +11,29 @@ type PaginatedResponse<T> = {
 };
 
 // Получение
-export const useExpenses = (page: Ref<number>, limit: Ref<number>) => {
+export const useExpenses = (
+    page: Ref<number>,
+    limit: Ref<number>,
+    sort: Ref<string>
+) => {
     return useQuery<PaginatedResponse<Expense>>({
         queryKey: ["expenses", page, limit],
         queryFn: async () => {
-            const res = await api.get("/expenses", {
-                params: {
-                    sortBy: "-id",
-                    page: page.value,
-                    limit: limit.value,
-                },
-            });
-            return res.data;
+            try {
+                const res = await api.get("/expenses", {
+                    params: {
+                        sortBy: sort.value,
+                        page: page.value,
+                        limit: limit.value,
+                    },
+                });
+                return res.data;
+            } catch (error: any) {
+                toast.error(`Ошибка получения данных: ${error.message}`);
+                throw new Error("Не удалось загрузить данные о расходах");
+            }
         },
+        retry: 1,
     });
 };
 
