@@ -1,44 +1,57 @@
 <script setup lang="ts">
-const props = defineProps({
-    currentPage: {
-        type: Number,
-        required: true,
-    },
-    totalPages: {
-        type: Number,
-        required: true,
-    },
+import { ref, watch } from "vue";
+import type { PaginationMeta } from "../types/Pagination";
+
+const props = defineProps<{
+    meta: PaginationMeta;
+    modelValue: number;
+}>();
+
+const emit = defineEmits(["update:modelValue", "update:perPage"]);
+
+const currentPage = ref(props.modelValue);
+const itemsPerPage = ref(props.meta.per_page);
+
+watch(currentPage, (newVal) => {
+    emit("update:modelValue", newVal);
 });
 
-const emit = defineEmits(["page-change"]);
+watch(itemsPerPage, (newVal) => {
+    emit("update:perPage", newVal);
+    currentPage.value = 1;
+});
 
-const goToPage = (page: number) => {
-    if (page >= 1 && page <= props.totalPages) {
-        emit("page-change", page);
+const nextPage = () => {
+    if (currentPage.value < props.meta.total_pages) {
+        currentPage.value++;
+    }
+};
+
+const prevPage = () => {
+    if (currentPage.value > 1) {
+        currentPage.value--;
     }
 };
 </script>
 
 <template>
-    <div v-if="totalPages > 1" class="pagination">
+    <div class="pagination">
         <button
-            @click="goToPage(currentPage - 1)"
+            @click="prevPage"
             :disabled="currentPage === 1"
             class="pagination-button"
-            :class="{ 'pagination-button--active': currentPage === 1 }"
         >
             Назад
         </button>
 
-        <span class="page-info">
-            Страница {{ currentPage }} из {{ totalPages }}
+        <span class="pagination-info">
+            {{ currentPage }} / {{ meta.total_pages }}
         </span>
 
         <button
-            @click="goToPage(currentPage + 1)"
-            :disabled="currentPage === totalPages"
+            @click="nextPage"
+            :disabled="currentPage === meta.total_pages"
             class="pagination-button"
-            :class="{ 'pagination-button--active': currentPage === totalPages }"
         >
             Вперед
         </button>
@@ -85,7 +98,7 @@ const goToPage = (page: number) => {
     opacity: 0.5;
 }
 
-.page-info {
+.pagination-info {
     font-size: 0.9rem;
     text-align: center;
 }

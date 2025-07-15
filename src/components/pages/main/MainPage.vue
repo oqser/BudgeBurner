@@ -5,32 +5,33 @@ import { computed, ref } from "vue";
 import { useExpenses } from "../../../composables/useExpenses";
 import Pagination from "../../Pagination.vue";
 
-type Expense = {
-    id: number;
-    title: string;
-    price: number | null;
-};
-
 const currentPage = ref(1);
-const itemsPerPage = 10;
+const itemsPerPage = ref(10);
 
-const { data: expensesData } = useExpenses();
+const { data: expensesData } = useExpenses(currentPage, itemsPerPage);
 
-const paginatedExpenses = computed(() => {
+const expenses = computed(() => {
     if (!expensesData.value) return [];
-
-    const sorted = [...expensesData.value].sort((a, b) => b.id - a.id);
-    const startIndex = (currentPage.value - 1) * itemsPerPage;
-    return sorted.slice(startIndex, startIndex + itemsPerPage);
+    return [...expensesData.value.items];
 });
 
-const totalPages = computed(() => {
-    if (!expensesData.value) return 0;
-    return Math.ceil(expensesData.value.length / itemsPerPage);
-});
+const paginationMeta = computed(
+    () =>
+        expensesData.value?.meta || {
+            total_items: 0,
+            total_pages: 1,
+            current_page: 1,
+            per_page: itemsPerPage.value,
+            remaining_count: 0,
+        }
+);
 
 const handlePageChange = (page: number) => {
     currentPage.value = page;
+};
+
+const handlePerPageChange = (perPage: number) => {
+    itemsPerPage.value = perPage;
 };
 </script>
 
@@ -41,16 +42,17 @@ const handlePageChange = (page: number) => {
 
     <div class="expense-list-block">
         <ExpenseItem
-            v-for="expense in paginatedExpenses"
+            v-for="expense in expenses"
             :key="expense.id"
             :expense="expense"
         />
     </div>
 
     <Pagination
-        :current-page="currentPage"
-        :total-pages="totalPages"
-        @page-change="handlePageChange"
+        :meta="paginationMeta"
+        :modelValue="currentPage"
+        @update:modelValue="handlePageChange"
+        @update:perPage="handlePerPageChange"
     />
 </template>
 

@@ -1,55 +1,31 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import api from "../api";
 import { toast } from "vue3-toastify";
+import type { Ref } from "vue";
+import type { PaginationMeta } from "../types/Pagination";
+import type { Expense } from "../types/Expense";
 
-type Expense = {
-    id: number;
-    title: string;
-    price: number;
+type PaginatedResponse<T> = {
+    meta: PaginationMeta;
+    items: T[];
 };
 
 // Получение
-export const useExpenses = () =>
-    useQuery<Expense[]>({
-        queryKey: ["expenses"],
+export const useExpenses = (page: Ref<number>, limit: Ref<number>) => {
+    return useQuery<PaginatedResponse<Expense>>({
+        queryKey: ["expenses", page, limit],
         queryFn: async () => {
-            const res = await api.get("/expenses");
+            const res = await api.get("/expenses", {
+                params: {
+                    sortBy: "-id",
+                    page: page.value,
+                    limit: limit.value,
+                },
+            });
             return res.data;
         },
     });
-// // get
-// export const useGetExpenses = () => {
-//     return useQuery<Expense[], Error>({
-//         queryKey: ["expenses"],
-
-//         queryFn: async () => {
-//             try {
-//                 const { data } = await api.get<Expense[]>("/expenses");
-//                 return data;
-//             } catch (error) {
-//                 if (axios.isAxiosError(error)) {
-//                     if (error.response) {
-//                         const errorMessage =
-//                             error.response.data?.message ||
-//                             error.response.statusText;
-//                         throw new Error(`Server error: ${errorMessage}`);
-//                     }
-//                     if (error.request) {
-//                         throw new Error(
-//                             "Network error: Could not connect to server"
-//                         );
-//                     }
-//                 }
-//                 throw new Error(
-//                     "Unknown error occurred while fetching expenses"
-//                 );
-//             }
-//         },
-//         refetchOnWindowFocus: false,
-//         retry: 1,
-//         staleTime: 1000 * 60 * 5,
-//     });
-// };
+};
 
 // Создание
 export const useCreateExpense = () => {
@@ -88,30 +64,6 @@ export const useUpdateExpense = () => {
             ),
     });
 };
-// update разобраться под делит
-// export const useUpdateExpense = () => {
-//     const queryClient = useQueryClient();
-
-//     return useMutation({
-//         mutationFn: async ({ id, title, price }: Expense) => {
-//             const { data } = await api.patch<Expense>(`/expenses/${id}`, {
-//                 title,
-//                 price,
-//             });
-//             return data;
-//         },
-//         onSuccess: (data) => {
-//             queryClient.invalidateQueries({ queryKey: ["expenses"] });
-//             toast.success(`Успешно обновлен ${data.title}!`);
-//             console.log(" Expense");
-//         },
-//         onError: (error: Error, data) => {
-//             console.error("Update expense error:", error.message);
-//             toast.error(`Не удалось обновить ${data.title}!`);
-//         },
-//         retry: 3,
-//     });
-// };
 
 // Удаление
 export const useDeleteExpense = () => {
@@ -131,34 +83,3 @@ export const useDeleteExpense = () => {
             ),
     });
 };
-// // delete
-// export const useDeleteExpense = (expense: Expense) => {
-//     const queryClient = useQueryClient();
-
-//     return useMutation({
-//         mutationFn: async () => {
-//             const { data } = await api.delete<Expense>(
-//                 `/expenses/${expense.id}`
-//             );
-//             return data;
-//         },
-//         onSuccess: () => {
-//             queryClient.invalidateQueries({ queryKey: ["expenses"] });
-//             toast.error(`${expense.title} удален`);
-//         },
-//         onError: (error: Error) => {
-//             console.error("Delete expense error:", error.message);
-//             toast.error(`Не удалось удалить ${expense.title}!`);
-//         },
-//         retry: 3,
-//         // (failureCount, error) => {
-//         //     if (axios.isAxiosError(error) && error.response?.status) {
-//         //         return (
-//         //             ![401, 404].includes(error.response.status) &&
-//         //             failureCount < 1
-//         //         );
-//         //     }
-//         //     return failureCount < 1;
-//         // },
-//     });
-// };

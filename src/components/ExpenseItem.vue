@@ -3,13 +3,10 @@ import { ref } from "vue";
 import { useDeleteExpense, useUpdateExpense } from "../composables/useExpenses";
 import { useCloseActions } from "../utils/useCloseActions";
 import ActionButtons from "./ActionButtons.vue";
+import type { Expense } from ".././types/Expense";
 
 const props = defineProps<{
-    expense: {
-        id: number;
-        title: string;
-        price: number;
-    };
+    expense: Expense;
 }>();
 
 const isEditing = ref(false);
