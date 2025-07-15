@@ -17,7 +17,7 @@ export const useExpenses = (
     sort: Ref<string>
 ) => {
     return useQuery<PaginatedResponse<Expense>>({
-        queryKey: ["expenses", page, limit],
+        queryKey: ["expenses", page, limit, sort],
         queryFn: async () => {
             try {
                 const res = await api.get("/expenses", {

@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useCreateExpense } from "../composables/useExpenses";
 
+const userId = ref(1);
 const expenseTitle = ref("");
 const expensePrice = ref<number | null>(null);
 
@@ -10,6 +11,7 @@ const create = useCreateExpense();
 
 const handleCreate = () => {
     create.mutate({
+        user_id: userId.value,
         title: expenseTitle.value,
         price: expensePrice.value || 0,
     }),

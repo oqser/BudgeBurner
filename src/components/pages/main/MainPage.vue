@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import ExpenseForm from "../../ExpenseForm.vue";
 import ExpenseItem from "../../ExpenseItem.vue";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useExpenses } from "../../../composables/useExpenses";
 import Pagination from "../../Pagination.vue";
+import SortSelector from "../../SortSelector.vue";
 
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
-const sortPage = ref("-id");
+const currentSort = ref("-id");
 
-const { data: expensesData } = useExpenses(currentPage, itemsPerPage, sortPage);
+const { data: expensesData } = useExpenses(
+    currentPage,
+    itemsPerPage,
+    currentSort
+);
 
 const expenses = computed(() => {
     if (!expensesData.value) return [];
@@ -48,13 +53,15 @@ const handlePerPageChange = (perPage: number) => {
             :expense="expense"
         />
     </div>
-
-    <Pagination
-        :meta="paginationMeta"
-        :modelValue="currentPage"
-        @update:modelValue="handlePageChange"
-        @update:perPage="handlePerPageChange"
-    />
+    <div class="expense-list-toolbar">
+        <Pagination
+            :meta="paginationMeta"
+            :modelValue="currentPage"
+            @update:modelValue="handlePageChange"
+            @update:perPage="handlePerPageChange"
+        />
+        <SortSelector v-model="currentSort" />
+    </div>
 </template>
 
 <style scoped>
@@ -71,5 +78,12 @@ const handlePerPageChange = (perPage: number) => {
 
 h2 {
     margin: 0;
+}
+
+.expense-list-toolbar {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    box-sizing: border-box;
 }
 </style>
