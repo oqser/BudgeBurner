@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+    type UseQueryOptions,
+} from "@tanstack/vue-query";
 import api from "../api";
 import { toast } from "vue3-toastify";
 import type { Ref } from "vue";
@@ -14,7 +19,8 @@ type PaginatedResponse<T> = {
 export const useExpenses = (
     page: Ref<number>,
     limit: Ref<number>,
-    sort: Ref<string>
+    sort: Ref<string>,
+    options?: any //Partial<UseQueryOptions<PaginatedResponse<Expense>>>
 ) => {
     return useQuery<PaginatedResponse<Expense>>({
         queryKey: ["expenses", page, limit, sort],
@@ -34,6 +40,7 @@ export const useExpenses = (
             }
         },
         retry: 1,
+        ...options,
     });
 };
 

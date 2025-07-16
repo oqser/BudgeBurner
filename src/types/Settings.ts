@@ -3,3 +3,7 @@ export type Settings = {
     sorting: string;
     pagination: number;
 };
+
+export type SettingsUpdate = Settings & {
+    settingType?: 'sorting' | 'pagination';
+};

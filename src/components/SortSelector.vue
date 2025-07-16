@@ -1,4 +1,20 @@
 <script setup lang="ts">
+import { ref, watch } from "vue";
+import { useUpdateSettings } from "../composables/useSettings";
+import type { Settings } from "../types/Settings";
+
+const props = defineProps<{
+    modelValue: string;
+    settings: Settings;
+}>();
+const emit = defineEmits(["update:modelValue"]);
+
+const updateSettings = useUpdateSettings();
+const settingsState = ref({
+    pagination: props.settings.pagination,
+    sorting: props.settings.sorting,
+});
+
 const sortOptions = [
     { value: "-date", label: "Сначала новые" },
     { value: "date", label: "Сначала старые" },
@@ -6,14 +22,16 @@ const sortOptions = [
     { value: "price", label: "Сначала дешевые" },
 ];
 
-const props = defineProps<{
-    modelValue: string;
-}>();
-
-const emit = defineEmits(["update:modelValue"]);
-
 const updateSort = (e: Event) => {
-    emit("update:modelValue", (e.target as HTMLSelectElement).value);
+    const newValueSorting = (e.target as HTMLSelectElement).value;
+    emit("update:modelValue", newValueSorting);
+    {
+        updateSettings.mutate({
+            user_id: props.settings.user_id,
+            sorting: newValueSorting,
+            pagination: settingsState.value.pagination,
+        });
+    }
 };
 </script>
 

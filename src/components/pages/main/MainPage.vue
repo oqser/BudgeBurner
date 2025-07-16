@@ -5,10 +5,28 @@ import { computed, ref, watch } from "vue";
 import { useExpenses } from "../../../composables/useExpenses";
 import Pagination from "../../Pagination.vue";
 import SortSelector from "../../SortSelector.vue";
+import { useSettings } from "../../../composables/useSettings";
 
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const currentSort = ref("-date");
+
+const { data: settingsData } = useSettings(1);
+watch(
+    settingsData,
+    (newSettings) => {
+        if (newSettings?.[0]?.sorting) {
+            currentSort.value = newSettings[0].sorting;
+        }
+    },
+    { immediate: true }
+);
+
+const settings = computed(() => ({
+    user_id: 1,
+    sorting: currentSort.value,
+    pagination: itemsPerPage.value,
+}));
 
 const { data: expensesData } = useExpenses(
     currentPage,
@@ -60,7 +78,7 @@ const handlePerPageChange = (perPage: number) => {
             @update:modelValue="handlePageChange"
             @update:perPage="handlePerPageChange"
         />
-        <SortSelector v-model="currentSort" />
+        <SortSelector v-model="currentSort" :settings="settings" />
     </div>
 </template>
 
