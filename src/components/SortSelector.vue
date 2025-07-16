@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const sortOptions = [
-    { value: "-id", label: "Сначала новые" },
-    { value: "id", label: "Сначала старые" },
+    { value: "-date", label: "Сначала новые" },
+    { value: "date", label: "Сначала старые" },
     { value: "-price", label: "Сначала дорогие" },
     { value: "price", label: "Сначала дешевые" },
 ];

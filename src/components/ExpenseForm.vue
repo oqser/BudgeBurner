@@ -5,6 +5,8 @@ import { useCreateExpense } from "../composables/useExpenses";
 const userId = ref(1);
 const expenseTitle = ref("");
 const expensePrice = ref<number | null>(null);
+const isoDate = new Date().toISOString().slice(0, 10);
+const expenseDate = ref(isoDate);
 
 // add
 const create = useCreateExpense();
@@ -14,9 +16,11 @@ const handleCreate = () => {
         user_id: userId.value,
         title: expenseTitle.value,
         price: expensePrice.value || 0,
+        date: expenseDate.value,
     }),
         (expenseTitle.value = ""),
-        (expensePrice.value = null);
+        (expensePrice.value = null),
+        (expenseDate.value = isoDate);
 };
 </script>
 
@@ -28,12 +32,8 @@ const handleCreate = () => {
             placeholder="Название"
             required
         />
-        <input
-            v-model="expensePrice"
-            type="number"
-            placeholder="Цена"
-            required
-        />
+        <input v-model="expensePrice" type="number" placeholder="Цена" />
+        <input v-model="expenseDate" type="date" placeholder="Дата" />
         <div class="expense-list-form-action-buttons">
             <button
                 @click="handleCreate"

@@ -82,9 +82,8 @@ const actionButtons = computed<ActionButton[]>(() =>
 <style scoped>
 .expense-item-actions {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: 0.3rem;
-    flex: 1;
     justify-content: flex-end;
 }
 

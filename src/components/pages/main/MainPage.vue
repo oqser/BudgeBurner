@@ -8,7 +8,7 @@ import SortSelector from "../../SortSelector.vue";
 
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
-const currentSort = ref("-id");
+const currentSort = ref("-date");
 
 const { data: expensesData } = useExpenses(
     currentPage,
@@ -69,11 +69,8 @@ const handlePerPageChange = (perPage: number) => {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.4rem;
-    justify-content: space-between;
-    max-width: 50vh;
     width: 100%;
+    align-items: center;
 }
 
 h2 {

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useDeleteExpense, useUpdateExpense } from "../composables/useExpenses";
 import { useCloseActions } from "../utils/useCloseActions";
 import ActionButtons from "./ActionButtons.vue";
 import type { Expense } from ".././types/Expense";
+import { formatDate } from "../utils/dateFormatter";
 
 const props = defineProps<{
     expense: Expense;
@@ -14,6 +15,7 @@ const editFormRef = ref<HTMLFormElement | null>(null);
 const formState = ref({
     title: props.expense.title,
     price: props.expense.price,
+    date: props.expense.date,
 });
 
 const update = useUpdateExpense();
@@ -34,10 +36,12 @@ useCloseActions(isEditing, cancelEditing, editFormRef);
 const handleUpdate = () => {
     if (
         formState.value.title !== props.expense.title ||
-        formState.value.price !== props.expense.price
+        formState.value.price !== props.expense.price ||
+        formState.value.date !== props.expense.date
     ) {
         update.mutate({
             id: props.expense.id,
+            user_id: props.expense.user_id,
             ...formState.value,
         });
     }
@@ -50,6 +54,9 @@ const handleRemove = () => {
         title: props.expense.title,
     });
 };
+
+const fullDate = computed(() => formatDate(props.expense.date, "DD.MM.YYYY"));
+const longDate = computed(() => formatDate(props.expense.date, "DD.month"));
 </script>
 
 <template>
@@ -72,6 +79,11 @@ const handleRemove = () => {
                 type="number"
                 v-model.number="formState.price"
             />
+            <input
+                class="expense-input-date"
+                type="date"
+                v-model.date="formState.date"
+            />
 
             <ActionButtons
                 :isEditing="isEditing"
@@ -82,11 +94,14 @@ const handleRemove = () => {
         </form>
 
         <div v-else class="expense-view">
-            <div class="expense-item-title">
-                <p>{{ expense.title }}</p>
+            <div class="expense-item-title" :title="expense.title">
+                {{ expense.title }}
             </div>
-            <div class="expense-item-price">
-                <p>{{ expense.price === 0 ? "" : expense.price }}</p>
+            <div class="expense-item-price" :title="expense.price + ' руб.'">
+                {{ expense.price === 0 ? "" : expense.price }}
+            </div>
+            <div class="expense-item-date" :title="fullDate">
+                {{ longDate }}
             </div>
 
             <ActionButtons
@@ -103,41 +118,46 @@ const handleRemove = () => {
     display: flex;
     width: 100%;
     box-sizing: border-box;
-    gap: 1rem;
+    max-width: 70vh;
 }
 
 .expense-view {
+    box-sizing: border-box;
     display: flex;
     width: 100%;
-    box-sizing: border-box;
-}
-
-.expense-item p {
-    font-size: 18px;
     margin: 0;
     padding: 0;
-    border: 2px solid transparent;
+    display: flex;
+    align-items: center;
 }
 
 .expense-item-title {
-    display: flex;
-    flex: 2;
+    flex: 4;
+    min-width: 0;
+    overflow: hidden;
+    text-align: start;
 }
+
 .expense-item-price {
-    display: flex;
-    justify-content: flex-end;
     flex: 1;
+    justify-content: flex-end;
+}
+
+.expense-item-date {
+    flex: 2;
+    justify-content: center;
+    width: 100%;
 }
 
 .expense-edit-form {
-    display: flex;
     width: 100%;
+    display: flex;
     box-sizing: border-box;
     gap: 0.5rem;
     align-items: center;
 }
 
-.expense-item input {
+.expense-edit-form input {
     padding: 2px;
     border: 2px solid rgba(0, 0, 0, 0.2);
     font-size: 20px;
@@ -146,10 +166,13 @@ const handleRemove = () => {
     width: 100%;
 }
 .expense-item input.expense-input-title {
-    padding-left: 0.3rem;
     flex: 5;
 }
 .expense-item input.expense-input-price {
+    text-align: center;
+    flex: 1;
+}
+.expense-item input.expense-input-date {
     text-align: center;
     flex: 1;
 }
