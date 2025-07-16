@@ -9,6 +9,7 @@ import { useSettings } from "../../../composables/useSettings";
 
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
+
 const currentSort = ref("-date");
 
 const { data: settingsData } = useSettings(1);
@@ -60,29 +61,40 @@ const handlePerPageChange = (perPage: number) => {
 </script>
 
 <template>
-    <h2>Лист затрат</h2>
+    <div class="expense-content">
+        <h2>Лист затрат</h2>
 
-    <ExpenseForm />
+        <ExpenseForm />
 
-    <div class="expense-list-block">
-        <ExpenseItem
-            v-for="expense in expenses"
-            :key="expense.id"
-            :expense="expense"
-        />
-    </div>
-    <div class="expense-list-toolbar">
-        <Pagination
-            :meta="paginationMeta"
-            :modelValue="currentPage"
-            @update:modelValue="handlePageChange"
-            @update:perPage="handlePerPageChange"
-        />
-        <SortSelector v-model="currentSort" :settings="settings" />
+        <div class="expense-list-block">
+            <ExpenseItem
+                v-for="expense in expenses"
+                :key="expense.id"
+                :expense="expense"
+            />
+        </div>
+        <div class="expense-list-toolbar">
+            <Pagination
+                :meta="paginationMeta"
+                :modelValue="currentPage"
+                @update:modelValue="handlePageChange"
+                @update:perPage="handlePerPageChange"
+            />
+            <SortSelector v-model="currentSort" :settings="settings" />
+        </div>
     </div>
 </template>
 
 <style scoped>
+.expense-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+    gap: 1rem;
+}
 .expense-list-block {
     box-sizing: border-box;
     display: flex;
@@ -92,7 +104,7 @@ const handlePerPageChange = (perPage: number) => {
 }
 
 h2 {
-    margin: 0;
+    margin: 2rem 0;
 }
 
 .expense-list-toolbar {

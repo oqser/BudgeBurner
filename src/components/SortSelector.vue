@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { toast } from "vue3-toastify";
 import { useUpdateSettings } from "../composables/useSettings";
 import type { Settings } from "../types/Settings";
 
@@ -10,10 +10,6 @@ const props = defineProps<{
 const emit = defineEmits(["update:modelValue"]);
 
 const updateSettings = useUpdateSettings();
-const settingsState = ref({
-    pagination: props.settings.pagination,
-    sorting: props.settings.sorting,
-});
 
 const sortOptions = [
     { value: "-date", label: "Сначала новые" },
@@ -24,13 +20,14 @@ const sortOptions = [
 
 const updateSort = (e: Event) => {
     const newValueSorting = (e.target as HTMLSelectElement).value;
+    const label = sortOptions.find((o) => o.value === newValueSorting)?.label;
     emit("update:modelValue", newValueSorting);
     {
         updateSettings.mutate({
             user_id: props.settings.user_id,
             sorting: newValueSorting,
-            pagination: settingsState.value.pagination,
         });
+        toast.success(`Сортировка: ${label} `);
     }
 };
 </script>

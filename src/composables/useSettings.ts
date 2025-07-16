@@ -22,8 +22,7 @@ export const useUpdateSettings = () => {
             const res = await api.patch(`/settings/${data.user_id}`, data);
             return res.data;
         },
-        onSuccess: (updatedSetting) => {
-            toast.success(`Обновлено: ${updatedSetting.title}`);
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["settings"] });
         },
         onError: (_, errorData) =>
