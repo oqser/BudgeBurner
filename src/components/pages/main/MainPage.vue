@@ -77,7 +77,7 @@ const handlePerPageChange = (perPage: number) => {
                 @update:modelValue="handlePageChange"
                 @update:perPage="handlePerPageChange"
             />
-            <SortSelector v-model="currentSort" :settings="settings" />
+            <!-- <SortSelector v-model="currentSort" :settings="settings" /> -->
         </div>
     </div>
 </template>

@@ -1,15 +1,28 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useCreateExpense } from "../composables/useExpenses";
+import { useCloseActions } from "../utils/useCloseActions";
 
 const userId = ref(1);
 const expenseTitle = ref("");
 const expensePrice = ref<number | null>(null);
 const isoDate = new Date().toISOString().slice(0, 10);
 const expenseDate = ref(isoDate);
+const isCreating = ref(false);
+const editFormRef = ref<HTMLFormElement | null>(null);
+
+const startCreate = () => {
+    isCreating.value = true;
+};
 
 // add
 const create = useCreateExpense();
+
+const canceCreating = () => {
+    if (!isCreating.value) return;
+    isCreating.value = false;
+};
+useCloseActions(isCreating, canceCreating, editFormRef);
 
 const handleCreate = () => {
     create.mutate({
@@ -21,29 +34,45 @@ const handleCreate = () => {
         (expenseTitle.value = ""),
         (expensePrice.value = null),
         (expenseDate.value = isoDate);
+    isCreating.value = false;
 };
 </script>
 
 <template>
-    <div class="expense-list-form">
+    <form class="expense-list-form" ref="editFormRef">
         <input
+            v-if="isCreating"
             v-model="expenseTitle"
             type="text"
             placeholder="Название"
             required
         />
-        <input v-model="expensePrice" type="number" placeholder="Цена" />
-        <input v-model="expenseDate" type="date" placeholder="Дата" />
+        <input
+            v-if="isCreating"
+            v-model="expensePrice"
+            type="number"
+            placeholder="Цена"
+        />
+        <input
+            v-if="isCreating"
+            v-model="expenseDate"
+            type="date"
+            placeholder="Дата"
+        />
         <div class="expense-list-form-action-buttons">
             <button
+                v-if="isCreating"
                 @click="handleCreate"
                 class="add-expense-button"
                 :disabled="!expenseTitle.trim()"
             >
-                Добавить
+                галка Сохранить
+            </button>
+            <button v-else @click="startCreate" class="add-expense-button">
+                + Добавить
             </button>
         </div>
-    </div>
+    </form>
 </template>
 
 <style scoped>
