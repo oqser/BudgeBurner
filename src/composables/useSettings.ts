@@ -26,8 +26,6 @@ export const useUpdateSettings = () => {
             queryClient.invalidateQueries({ queryKey: ["settings"] });
         },
         onError: (_, errorData) =>
-            toast.error(
-                `Ошибка при обновлении: ${(errorData as any)?.title || "..."}`
-            ),
+            toast.error(`Ошибка при обновлении настроек`),
     });
 };

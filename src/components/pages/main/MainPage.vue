@@ -1,27 +1,24 @@
 <script setup lang="ts">
 import ExpenseForm from "../../ExpenseForm.vue";
 import ExpenseItem from "../../ExpenseItem.vue";
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, watchEffect } from "vue";
 import { useExpenses } from "../../../composables/useExpenses";
 import Pagination from "../../Pagination.vue";
-import SortSelector from "../../SortSelector.vue";
+import SortSelector from "../../SelectorSort.vue";
 import { useSettings } from "../../../composables/useSettings";
 
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
-
 const currentSort = ref("-date");
 
 const { data: settingsData } = useSettings(1);
-watch(
-    settingsData,
-    (newSettings) => {
-        if (newSettings?.[0]?.sorting) {
-            currentSort.value = newSettings[0].sorting;
-        }
-    },
-    { immediate: true }
-);
+watchEffect(() => {
+    const settings = settingsData.value?.[0];
+    if (!settings) return;
+
+    currentSort.value = settings.sorting || currentSort.value;
+    itemsPerPage.value = settings.pagination || itemsPerPage.value;
+});
 
 const settings = computed(() => ({
     user_id: 1,
